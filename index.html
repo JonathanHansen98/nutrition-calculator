@@ -44,14 +44,8 @@
                 <div class="input-group">
                   <span class="input-group-label">Search for a meal:</span>
                   <input id="search-input" class="input-group-field " type="text">
-                  <div class="input-group-label">
-                    <label>
-                      <select>
-                        <option value="categories">Category</option>
-                        <option value="s=">Key Ingredient</option>
-                        <option value="a=">Region</option>
-                      </select>
-                    </label>
+                  <div class="input-group-button">
+                    <input id="calculate-btn" type="button" class="button" value="Calulate!">
                   </div>
                   <div class="input-group-button">
                     <input id="meal1" type="submit" class="button" value="Search">
@@ -71,7 +65,7 @@
   
 <div class="grid-x grid-padding-x">
       <div id="container"  style="width:50%; height:400px;" class="cell small-6">Auto</div>
-      <div class="cell small-6">Auto</div>
+      <div id = "mealCategory" class="cell small-6"></div>
   </div>
 </div>
 

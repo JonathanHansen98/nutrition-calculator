@@ -26,12 +26,15 @@ $("#meal1").click(function (e) {
             url: "https://www.themealdb.com/api/json/v1/1/search.php?s=" + searchVal
         }).then(function (res) {
             console.log(res)
+         
+            let name = ""
+            
             let shuffledOptions = shuffle(res.meals)
             for (let index = 0; index < 5; index++) {
                 let option = shuffledOptions[index]
                 if (option !== undefined) {
                     let img = option.strMealThumb
-                    let name = option.strMeal
+                    name = option.strMeal
                     let cardEl = $("<div>")
                     let cardSection = $("<div>")
                     cardSection.addClass("card-section")
@@ -59,8 +62,8 @@ $("#meal1").click(function (e) {
                     url: "https://trackapi.nutritionix.com/v2/natural/nutrients",
                     "headers": {
                         "Content-Type": "application/json",
-                        "x-app-id": "5e073232",
-                        "x-app-key": "585d9f5f1c0b728a00307dc296b0930d",
+                        "x-app-id": "91be4d88",
+                        "x-app-key": "ab48d998ad78cda49ea9a6ffbac1461b",
                         "x-remote-user-id": "0"
                     },
                     data: JSON.stringify({
@@ -70,17 +73,31 @@ $("#meal1").click(function (e) {
                     })
                 }).then(function (res) {
                     console.log(res)
+                    let totalCal = 0;
+                    let totalFat = 0;
+                    let totalCarbs = 0;
+                    let totalPro = 0;
+
                     for (let index = 0; index < res.foods.length; index++) {
-                        let totalCal = res.foods[index].nf_calories
-                        let totalFat = res.foods[index].nf_total_fat
-                        let totalCarbs = res.foods[index].nf_total_carbohydrate
-                        let totalPro = res.foods[index].nf_protein
+                        totalCal = res.foods[index].nf_calories
+                        totalFat = res.foods[index].nf_total_fat
+                        totalCarbs = res.foods[index].nf_total_carbohydrate
+                        totalPro = res.foods[index].nf_protein
                         console.log(totalCal)
                         calArr.push(totalCal)
                         proArr.push(totalPro)
                         fatArr.push(totalFat)
                         carbArr.push(totalCarbs)
                     }
+                    //append name and nutrition info here
+                    let nameheader = $("<h5>")
+                    nameheader.html(name)
+                    let pTag =$("<p>");
+                    pTag.append("Calories: "+totalCal, "<br>","Fat: "+totalFat, "<br>","Carbs: " +totalCarbs, "<br>","Protein: "+totalPro, "<br>")
+                    
+
+                    $("#mealCategory").append(nameheader,pTag)
+
                     console.log(calArr)
                     console.log(carbArr)
                     console.log(fatArr)
@@ -92,10 +109,10 @@ $("#meal1").click(function (e) {
 })
 
 function mainArr () {  
-    totalData.push(adder(calArr))
-    totalData.push(adder(carbArr))
-    totalData.push(adder(fatArr))
-    totalData.push(adder(proArr))
+    totalData.push(parseInt(adder(calArr)))
+    totalData.push(parseInt(adder(carbArr)))
+    totalData.push(parseInt(adder(fatArr)))
+    totalData.push(parseInt(adder(proArr)))
 
     console.log(totalData)
     var myChart = Highcharts.chart('container', {
@@ -134,6 +151,11 @@ function adder (array) {
 document.addEventListener('DOMContentLoaded', function () {
 
 });
+
+$("#calculate-btn").click(function (e) {
+    e.preventDefault()
+    mainArr()
+})
 
 function shuffle(a) {
     var j, x, i;

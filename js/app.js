@@ -1,20 +1,23 @@
 $(document).foundation()
 const appID = "91be4d88";
 const appKey = "ab48d998ad78cda49ea9a6ffbac1461b";
-
+// Global array variables
 var calArr = []
 var proArr = []
 var fatArr = []
 var carbArr = []
-
 var totalData = []
-
-
+// Modal variables
+var popup = new Foundation.Reveal($('#first-modal'))
+var queryModal = new Foundation.Reveal($('#query-modal'))
+var instructions = new Foundation.Reveal($('#instructions'))
+// Opens modal on page load
+instructions.open()
 
 $("#meal1").click(function (e) {
     e.preventDefault()
+    // Prevents empty searches
     var searchVal = $("#search-input").val()
-    var popup = new Foundation.Reveal($('#first-modal'))
     if (searchVal === "") {
         popup.open()
     }
@@ -26,9 +29,9 @@ $("#meal1").click(function (e) {
             url: "https://www.themealdb.com/api/json/v1/1/search.php?s=" + searchVal
         }).then(function (res) {
             console.log(res)
-         
+
             let name = ""
-            
+
             let shuffledOptions = shuffle(res.meals)
             for (let index = 0; index < 5; index++) {
                 let option = shuffledOptions[index]
@@ -37,7 +40,7 @@ $("#meal1").click(function (e) {
                     name = option.strMeal
                     let cardEl = $("<div>")
                     let cardSection = $("<div>")
-                    cardSection.addClass("card-section")
+                    cardSection.addClass("card-section text-center")
                     $(cardEl).addClass("card")
                     let cardImg = $("<img>")
                     $(cardImg).attr("src", img)
@@ -47,7 +50,7 @@ $("#meal1").click(function (e) {
                     cardEl.append(cardImg)
                     cardEl.append(cardSection)
                     let cardCell = $("<div>")
-                    cardCell.addClass("cell meal-option")
+                    cardCell.addClass("cell meal-option large-auto")
                     cardCell.append(cardEl)
                     $("#card-row").append(cardCell)
                 }
@@ -92,11 +95,13 @@ $("#meal1").click(function (e) {
                     //append name and nutrition info here
                     let nameheader = $("<h5>")
                     nameheader.html(name)
-                    let pTag =$("<p>");
-                    pTag.append("Calories: "+totalCal, "<br>","Fat: "+totalFat, "<br>","Carbs: " +totalCarbs, "<br>","Protein: "+totalPro, "<br>")
-                    
+                    let pTag = $("<p>");
+                    // Grabs newest value in calArr(calArr is all food item macros combined), which would be the most recent item they selected
+                    pTag.append("Calories: " + calArr[calArr.length - 1], "<br>", "Fat: " + fatArr[fatArr.length - 1], "<br>", "Carbs: " + carbArr[carbArr.length - 1], "<br>", "Protein: " + proArr[proArr.length - 1], "<br>")
 
-                    $("#mealCategory").append(nameheader,pTag)
+                    let mealDiv = $("<div>")
+                    $(mealDiv).append(nameheader, pTag)
+                    $("#mealCategory").append(mealDiv)
 
                     console.log(calArr)
                     console.log(carbArr)
@@ -108,7 +113,19 @@ $("#meal1").click(function (e) {
     }
 })
 
-function mainArr () {  
+$("#reset-button").click(function () {
+    $("#container").empty()
+    $("#mealCategory").empty()
+    $("#card-row").empty()
+    calArr = []
+    proArr = []
+    fatArr = []
+    carbArr = []
+    totalData = []
+})
+
+function mainArr() {
+    totalData = [];
     totalData.push(parseInt(adder(calArr)))
     totalData.push(parseInt(adder(carbArr)))
     totalData.push(parseInt(adder(fatArr)))
@@ -123,7 +140,7 @@ function mainArr () {
             text: 'Nutritional Information'
         },
         xAxis: {
-            categories: ['Calories', 'Protein', 'Carbs', 'Fat']
+            categories: ['Calories', 'Carbs', 'Fats', 'Proteins']
         },
         yAxis: {
             title: {
@@ -140,7 +157,7 @@ function mainArr () {
     });
 }
 
-function adder (array) {
+function adder(array) {
     var sum = array.reduce(function (a, b) {
         return a + b;
     }, 0)
@@ -158,6 +175,9 @@ $("#calculate-btn").click(function (e) {
 })
 
 function shuffle(a) {
+    if (a === null) {
+        queryModal.open()
+    }
     var j, x, i;
     for (i = a.length - 1; i > 0; i--) {
         j = Math.floor(Math.random() * (i + 1));

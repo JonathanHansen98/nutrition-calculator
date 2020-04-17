@@ -4,4 +4,34 @@
 
 .card:hover {
     background-color: rgb(223, 223, 223);
+    border: ivory;
 }
+
+.card {
+    margin: auto;
+    padding: 1%;
+    height: 300px;
+}
+
+#card-row {
+    padding: 3%;
+}
+
+#container {
+    
+}
+
+#mealCategory {
+   
+}
+
+body {
+    background-color: rgb(48, 92, 48);
+}
+
+@media only screen and (max-width: 600px) {
+    .meal-option {
+        margin-top: 5px;
+      width: 150px!important;
+    }
+  }

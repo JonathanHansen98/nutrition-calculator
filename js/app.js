@@ -7,13 +7,17 @@ var proArr = []
 var fatArr = []
 var carbArr = []
 var totalData = []
+var itemCalArr = []
+var itemCarbrr = []
+var itemFatArr = []
+var itemProArr = []
+
 // Modal variables
 var popup = new Foundation.Reveal($('#first-modal'))
 var queryModal = new Foundation.Reveal($('#query-modal'))
 var instructions = new Foundation.Reveal($('#instructions'))
 // Opens modal on page load
 instructions.open()
-
 $("#meal1").click(function (e) {
     e.preventDefault()
     // Prevents empty searches
@@ -21,6 +25,7 @@ $("#meal1").click(function (e) {
     if (searchVal === "") {
         popup.open()
     }
+    // Otherwise makes call to meal DB and displays 5 random meal cards(if able)
     else {
         $("#card-row").empty()
         $("#meal-form")[0].reset()
@@ -28,10 +33,7 @@ $("#meal1").click(function (e) {
             method: "GET",
             url: "https://www.themealdb.com/api/json/v1/1/search.php?s=" + searchVal
         }).then(function (res) {
-            console.log(res)
-
             let name = ""
-
             let shuffledOptions = shuffle(res.meals)
             for (let index = 0; index < 5; index++) {
                 let option = shuffledOptions[index]
@@ -57,8 +59,8 @@ $("#meal1").click(function (e) {
 
 
             }
+            // Makes call to Nutritionix API based on the meal clicked
             $(".meal-option").click(function (e) {
-                console.log($(this)[0].innerText)
                 let name = $(this)[0].innerText
                 $.ajax({
                     method: "POST",
@@ -75,44 +77,47 @@ $("#meal1").click(function (e) {
                         "locale": "en_US"
                     })
                 }).then(function (res) {
-                    console.log(res)
-                    let totalCal = 0;
-                    let totalFat = 0;
-                    let totalCarbs = 0;
-                    let totalPro = 0;
-
+                    let itemCalArr = []
+                    let itemCarbArr = []
+                    let itemFatArr = []
+                    let itemProArr = []
+                    // for each item returned from the Nutritionix API and grabs the values for each macro nutrients, and pushes them into corresponding array
                     for (let index = 0; index < res.foods.length; index++) {
-                        totalCal = res.foods[index].nf_calories
-                        totalFat = res.foods[index].nf_total_fat
-                        totalCarbs = res.foods[index].nf_total_carbohydrate
-                        totalPro = res.foods[index].nf_protein
-                        console.log(totalCal)
-                        calArr.push(totalCal)
-                        proArr.push(totalPro)
-                        fatArr.push(totalFat)
-                        carbArr.push(totalCarbs)
+                        let totalCal = res.foods[index].nf_calories
+                        let totalFat = res.foods[index].nf_total_fat
+                        let totalCarbs = res.foods[index].nf_total_carbohydrate
+                        let totalPro = res.foods[index].nf_protein
+                        itemCalArr.push(totalCal)
+                        itemProArr.push(totalPro)
+                        itemFatArr.push(totalFat)
+                        itemCarbArr.push(totalCarbs)
                     }
-                    //append name and nutrition info here
+                    // Adds each macro to get totals for the meal chosen
+                    let itemCaltotal = parseInt(adder(itemCalArr))
+                    let itemCarbtotal = parseInt(adder(itemCarbArr))
+                    let itemFattotal = parseInt(adder(itemFatArr))
+                    let itemPrototal = parseInt(adder(itemProArr))
+                    // Pushes total macro values into arrays, to be added with additional meals
+                    calArr.push(itemCaltotal)
+                    carbArr.push(itemCarbtotal)
+                    fatArr.push(itemFattotal)
+                    proArr.push(itemPrototal)
                     let nameheader = $("<h5>")
                     nameheader.html(name)
                     let pTag = $("<p>");
-                    // Grabs newest value in calArr(calArr is all food item macros combined), which would be the most recent item they selected
-                    pTag.append("Calories: " + calArr[calArr.length - 1], "<br>", "Fat: " + fatArr[fatArr.length - 1], "<br>", "Carbs: " + carbArr[carbArr.length - 1], "<br>", "Protein: " + proArr[proArr.length - 1], "<br>")
-
+                    // Grabs newest value in each array,and appends to html
+                    pTag.append("Calories: " + calArr[calArr.length - 1] + "<br>", "Fat: " + fatArr[fatArr.length - 1], "<br>", "Carbs: " + carbArr[carbArr.length - 1], "<br>", "Protein: " + proArr[proArr.length - 1], "<br>")
                     let mealDiv = $("<div>")
                     $(mealDiv).append(nameheader, pTag)
                     $("#mealCategory").append(mealDiv)
-
-                    console.log(calArr)
-                    console.log(carbArr)
-                    console.log(fatArr)
-                    console.log(proArr)
                 })
             })
         })
     }
 })
 
+
+// Clears arrays and resets html elements
 $("#reset-button").click(function () {
     $("#container").empty()
     $("#mealCategory").empty()
@@ -123,15 +128,13 @@ $("#reset-button").click(function () {
     carbArr = []
     totalData = []
 })
-
+// Adding all macros from each meal and pushes into a totalData array which is used by highcharts to graph the information
 function mainArr() {
     totalData = [];
-    totalData.push(parseInt(adder(calArr)))
-    totalData.push(parseInt(adder(carbArr)))
-    totalData.push(parseInt(adder(fatArr)))
-    totalData.push(parseInt(adder(proArr)))
-
-    console.log(totalData)
+    totalData.push(adder(calArr))
+    totalData.push(adder(carbArr))
+    totalData.push(adder(fatArr))
+    totalData.push(adder(proArr))
     var myChart = Highcharts.chart('container', {
         chart: {
             type: 'column'
@@ -156,25 +159,21 @@ function mainArr() {
         }]
     });
 }
-
+// Function for adding values in array's
 function adder(array) {
     var sum = array.reduce(function (a, b) {
         return a + b;
     }, 0)
     return sum
-    console.log(sum)
 }
-
-document.addEventListener('DOMContentLoaded', function () {
-
-});
-
+// Runs function to create graph
 $("#calculate-btn").click(function (e) {
     e.preventDefault()
     mainArr()
 })
-
+// Function to shuffle values in array
 function shuffle(a) {
+    // Shows modal for unreturned search items
     if (a === null) {
         queryModal.open()
     }
